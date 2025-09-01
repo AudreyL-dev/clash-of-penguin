@@ -24,6 +24,7 @@ public class EcranTitre {
 
     // Méthode pour afficher
     public static void showTitle() {
+    	System.out.println();
         System.out.println(TITLE);
     }
 }

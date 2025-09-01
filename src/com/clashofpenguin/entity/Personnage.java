@@ -1,118 +1,90 @@
 package com.clashofpenguin.entity;
 
 public abstract class Personnage {
-	// =======================================
-		// = ATTRIBUTS =
-		// =======================================
 
-		private String nom;// nom du personnage
-		private int pointDeVie;
-		private int niveau;
-		private int force;
-		private boolean estVivant;
-		private int defense;
+    private String nom;
+    private int pointDeVie;
+    private int niveau;
+    private int force;
+    private boolean estVivant;
+    private int defense;
 
-		// =======================================
-		// = CONSTRUCTEURS =
-		// =======================================
+    // --- CTORS ---
+    public Personnage() {}
 
-		public Personnage() {
+    public Personnage(String nom, int pointDeVie, int niveau, int force, boolean estVivant, int defense) {
+        this.setNom(nom);
+        this.setPointDeVie(pointDeVie);
+        this.setNiveau(niveau);
+        this.setForce(force);
+        this.setEstVivant(estVivant);
+        this.setDefense(defense);
+    }
 
-		}
+    // --- API OOP : attaquer / subir / calculer ---
+    /** Appel côté attaquant (non static, pas de instanceof). */
+    public void attaquer(Personnage cible) {
+        if (!estVivant) {
+            System.out.println(nom + " ne peut pas attaquer (K.O).");
+            return;
+        }
+        int degats = calculerDegatsContre(cible);
+        cible.subirDegats(degats, this);
+    }
 
-		public Personnage(String nom, int pointDeVie, int niveau, int force, boolean estVivant, int defense) {
-		
-			this.setNom(nom);
-			this.setPointDeVie(pointDeVie);
-			this.setNiveau(niveau);
-			this.setForce(force);
-			this.setEstVivant(estVivant);
-			this.setDefense(defense);
-		}
+    /** Calcul de dégâts : peut être surchargé par les sous-classes. */
+    protected int calculerDegatsContre(Personnage cible) {
+        // Modèle simple : dégâts bruts - défense, minimum 0.
+        int bruts = degatsBruts();
+        int nets  = Math.max(0, bruts - cible.getDefense());
+        return nets;
+    }
 
-		// =======================================
-		// = GETTERS ET SETTERS =
-		// =======================================
+    /** Dégâts bruts (base commune) : force + petit bonus de niveau. */
+    protected int degatsBruts() {
+        return getForce() + Math.max(0, getNiveau() / 2);
+    }
 
-		public String getNom() {
-			return nom;
-		}
+    /** Côté défenseur. Peut être surchargé pour réactions spéciales. */
+    protected void subirDegats(int quantite, Personnage source) {
+        setPointDeVie(Math.max(0, getPointDeVie() - quantite));
+        if (getPointDeVie() == 0) {
+            setEstVivant(false);
+        }
+        System.out.println(
+            source.getNom() + " inflige " + quantite + " PV à " + getNom() +
+            " (PV restants: " + getPointDeVie() + (isEstVivant() ? ")" : ", K.O.)")
+        );
+    }
 
-		public void setNom(String nom) {
-			this.nom = nom;
-		}
+    // --- Hooks narratifs / spécifiques ---
+    public abstract void sePresenter();
+    public abstract void perteSubi();  // si tu veux déclencher une réplique
+    public abstract void defendre();   // si tu veux une action de défense active
 
-		public int getPointDeVie() {
-			return pointDeVie;
-		}
-
-		public void setPointDeVie(int pointDeVie) {
-			this.pointDeVie = pointDeVie;
-		}
-
-		public int getNiveau() {
-			return niveau;
-		}
-
-		public void setNiveau(int niveau) {
-			this.niveau = niveau;
-		}
-
-		public int getForce() {
-			return force;
-		}
-
-		public void setForce(int force) {
-			this.force = force;
-		}
-
-		public boolean isEstVivant() {
-			return estVivant;
-		}
-
-		public void setEstVivant(boolean estVivant) {
-			this.estVivant = estVivant;
-		}
-
-		public int getDefense() {
-			return defense;
-		}
-
-		public void setDefense(int defense) {
-			this.defense = defense;
-		}
-		// =======================================
-		// = METHODES ABSTRAITES =
-		// =======================================
-
-		public abstract void sePresenter();
-
-		public abstract void defendre();
-
-		// =======================================
-		// = METHODES =
-		// =======================================
-
-		public void subirDegats(int degats) {
-			this.pointDeVie -= degats;
-			if (this.pointDeVie <= 0) {
-				this.pointDeVie = 0;
-				this.estVivant = false;
-				System.out.println(this.nom + " est vaincu !");
-			}
-		}
-
-		public void attaquer(Personnage ennemi) {
-			// Si le personnage est vivant, il peut attaquer
-			if (this.estVivant) {
-				int degats = this.force - ennemi.getDefense();
-				if (degats < 0) {
-					degats = 0; // éviter de soigner l'ennemi
-				}
-				ennemi.subirDegats(degats);
-				System.out.println(
-						this.nom + " attaque " + ennemi.getNom() + " et inflige " + degats + " points de dégâts !");
-			}
-		}
-
+    // --- Getters/Setters ---
+    public String getNom() {
+    	return nom; }
+    public void setNom(String nom) { 
+    	this.nom = nom; }
+    public int getPointDeVie() { 
+    	return pointDeVie; }
+    public void setPointDeVie(int pointDeVie) { 
+    	this.pointDeVie = pointDeVie; }
+    public int getNiveau() {
+    	return niveau; }
+    public void setNiveau(int niveau) {
+    	this.niveau = niveau; }
+    public int getForce() {
+    	return force; }
+    public void setForce(int force) {
+    	this.force = force; }
+    public boolean isEstVivant() {
+    	return estVivant; }
+    public void setEstVivant(boolean estVivant) {
+    	this.estVivant = estVivant; }
+    public int getDefense() { 
+    	return defense; }
+    public void setDefense(int defense) {
+    	this.defense = defense; }
 }
